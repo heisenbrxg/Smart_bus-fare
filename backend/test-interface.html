@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprint Scanner Test - SmartBus Wallet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(235, 51, 73, 0.4);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .result pre {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-badge.online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .fingerprint-icon {
+            font-size: 4em;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Fingerprint Scanner Integration</h1>
+            <p>SmartBus Wallet System - Test Interface</p>
+        </div>
+
+        <!-- System Status -->
+        <div class="card">
+            <h2>System Status</h2>
+            <button class="btn btn-info" onclick="checkHealth()">Check System Health</button>
+            <button class="btn btn-info" onclick="getDeviceInfo()">Get Scanner Info</button>
+            <div id="healthResult" class="result"></div>
+        </div>
+
+        <!-- User Registration -->
+        <div class="card">
+            <h2>1️⃣ User Registration</h2>
+            <div class="form-group">
+                <label>User ID:</label>
+                <input type="text" id="regUserId" placeholder="e.g., 1001" value="1001">
+            </div>
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" id="regName" placeholder="e.g., John Doe" value="John Doe">
+            </div>
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="text" id="regPhone" placeholder="e.g., 9876543210" value="9876543210">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="regEmail" placeholder="e.g., john@example.com" value="john@example.com">
+            </div>
+            <div class="form-group">
+                <label>Initial Balance:</label>
+                <input type="number" id="regBalance" placeholder="e.g., 500" value="500">
+            </div>
+            <button class="btn btn-primary" onclick="registerUser()">Register User</button>
+            <div id="regResult" class="result"></div>
+        </div>
+
+        <!-- Fingerprint Capture -->
+        <div class="card">
+            <h2>2️⃣ Fingerprint Capture</h2>
+            <div class="fingerprint-icon">👆</div>
+            <div class="form-group">
+                <label>User ID:</label>
+                <input type="text" id="captureUserId" placeholder="e.g., 1001" value="1001">
+            </div>
+            <button class="btn btn-success" onclick="captureFingerprint()">Capture Fingerprint</button>
+            <div id="captureResult" class="result"></div>
+        </div>
+
+        <!-- Fingerprint Verification -->
+        <div class="card">
+            <h2>3️⃣ Fingerprint Verification</h2>
+            <div class="fingerprint-icon">✅</div>
+            <div class="form-group">
+                <label>User ID:</label>
+                <input type="text" id="verifyUserId" placeholder="e.g., 1001" value="1001">
+            </div>
+            <button class="btn btn-success" onclick="verifyFingerprint()">Verify Fingerprint</button>
+            <div id="verifyResult" class="result"></div>
+        </div>
+
+        <!-- User Management -->
+        <div class="card">
+            <h2>4️⃣ User Management</h2>
+            <div class="form-group">
+                <label>User ID:</label>
+                <input type="text" id="manageUserId" placeholder="e.g., 1001" value="1001">
+            </div>
+            <button class="btn btn-info" onclick="getUser()">Get User Info</button>
+            <button class="btn btn-info" onclick="getAllUsers()">Get All Users</button>
+            <button class="btn btn-info" onclick="getUserFingerprints()">Get User Fingerprints</button>
+            <div id="manageResult" class="result"></div>
+        </div>
+
+        <!-- Wallet Operations -->
+        <div class="card">
+            <h2>5️⃣ Wallet Operations</h2>
+            <div class="form-group">
+                <label>User ID:</label>
+                <input type="text" id="walletUserId" placeholder="e.g., 1001" value="1001">
+            </div>
+            <div class="form-group">
+                <label>Amount:</label>
+                <input type="number" id="walletAmount" placeholder="e.g., 100" value="100">
+            </div>
+            <button class="btn btn-success" onclick="rechargeWallet()">Recharge Wallet</button>
+            <button class="btn btn-danger" onclick="deductWallet()">Deduct from Wallet</button>
+            <div id="walletResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001';
+
+        function showResult(elementId, type, message, data = null) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+            
+            let html = `<strong>${message}</strong>`;
+            if (data) {
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            resultDiv.innerHTML = html;
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`);
+                const data = await response.json();
+                showResult('healthResult', 'success', '✅ System is healthy', data);
+            } catch (error) {
+                showResult('healthResult', 'error', '❌ Failed to connect to server', { error: error.message });
+            }
+        }
+
+        async function getDeviceInfo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/fingerprint/device-info`);
+                const data = await response.json();
+                if (data.success) {
+                    showResult('healthResult', 'success', '✅ Scanner device info retrieved', data);
+                } else {
+                    showResult('healthResult', 'error', '⚠️ Scanner not available', data);
+                }
+            } catch (error) {
+                showResult('healthResult', 'error', '❌ Failed to get device info', { error: error.message });
+            }
+        }
+
+        async function registerUser() {
+            const userData = {
+                userId: document.getElementById('regUserId').value,
+                name: document.getElementById('regName').value,
+                phone: document.getElementById('regPhone').value,
+                email: document.getElementById('regEmail').value,
+                balance: parseFloat(document.getElementById('regBalance').value)
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('regResult', 'success', '✅ User registered successfully', data);
+                } else {
+                    showResult('regResult', 'error', '❌ Registration failed', data);
+                }
+            } catch (error) {
+                showResult('regResult', 'error', '❌ Error registering user', { error: error.message });
+            }
+        }
+
+        async function captureFingerprint() {
+            const userId = document.getElementById('captureUserId').value;
+            
+            showResult('captureResult', 'info', '⏳ Capturing fingerprint... Please place your finger on the scanner');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/fingerprint/capture`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('captureResult', 'success', '✅ Fingerprint captured successfully', data);
+                } else {
+                    showResult('captureResult', 'error', '❌ Capture failed', data);
+                }
+            } catch (error) {
+                showResult('captureResult', 'error', '❌ Error capturing fingerprint', { error: error.message });
+            }
+        }
+
+        async function verifyFingerprint() {
+            const userId = document.getElementById('verifyUserId').value;
+            
+            showResult('verifyResult', 'info', '⏳ Verifying fingerprint... Please place your finger on the scanner');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/fingerprint/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+                const data = await response.json();
+                
+                if (data.success && data.matched) {
+                    showResult('verifyResult', 'success', `✅ Fingerprint matched! Score: ${data.score}`, data);
+                } else if (data.success && !data.matched) {
+                    showResult('verifyResult', 'error', `❌ Fingerprint did not match. Score: ${data.score}`, data);
+                } else {
+                    showResult('verifyResult', 'error', '❌ Verification failed', data);
+                }
+            } catch (error) {
+                showResult('verifyResult', 'error', '❌ Error verifying fingerprint', { error: error.message });
+            }
+        }
+
+        async function getUser() {
+            const userId = document.getElementById('manageUserId').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users/${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('manageResult', 'success', '✅ User information retrieved', data);
+                } else {
+                    showResult('manageResult', 'error', '❌ User not found', data);
+                }
+            } catch (error) {
+                showResult('manageResult', 'error', '❌ Error fetching user', { error: error.message });
+            }
+        }
+
+        async function getAllUsers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('manageResult', 'success', `✅ Retrieved ${data.count} users`, data);
+                } else {
+                    showResult('manageResult', 'error', '❌ Failed to fetch users', data);
+                }
+            } catch (error) {
+                showResult('manageResult', 'error', '❌ Error fetching users', { error: error.message });
+            }
+        }
+
+        async function getUserFingerprints() {
+            const userId = document.getElementById('manageUserId').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/fingerprint/user/${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('manageResult', 'success', `✅ Retrieved ${data.count} fingerprints`, data);
+                } else {
+                    showResult('manageResult', 'error', '❌ Failed to fetch fingerprints', data);
+                }
+            } catch (error) {
+                showResult('manageResult', 'error', '❌ Error fetching fingerprints', { error: error.message });
+            }
+        }
+
+        async function rechargeWallet() {
+            const userId = document.getElementById('walletUserId').value;
+            const amount = parseFloat(document.getElementById('walletAmount').value);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users/${userId}/recharge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('walletResult', 'success', '✅ Wallet recharged successfully', data);
+                } else {
+                    showResult('walletResult', 'error', '❌ Recharge failed', data);
+                }
+            } catch (error) {
+                showResult('walletResult', 'error', '❌ Error recharging wallet', { error: error.message });
+            }
+        }
+
+        async function deductWallet() {
+            const userId = document.getElementById('walletUserId').value;
+            const amount = parseFloat(document.getElementById('walletAmount').value);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users/${userId}/deduct`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('walletResult', 'success', '✅ Amount deducted successfully', data);
+                } else {
+                    showResult('walletResult', 'error', '❌ Deduction failed', data);
+                }
+            } catch (error) {
+                showResult('walletResult', 'error', '❌ Error deducting from wallet', { error: error.message });
+            }
+        }
+
+        // Auto-check health on page load
+        window.addEventListener('load', () => {
+            checkHealth();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "Wallet System Pro",
+  "description": "A secure and elegant multi-user wallet management system with fingerprint simulation, payment updating, and user profile management.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
