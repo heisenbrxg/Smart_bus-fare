@@ -110,15 +110,19 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start server
-app.listen(port, () => {
-    console.log('='.repeat(50));
-    console.log(`🚀 SmartBus Wallet System Backend`);
-    console.log(`📡 Server running at http://localhost:${port}`);
-    console.log(`🔐 Fingerprint Scanner: ${process.env.FINGERPRINT_SCANNER_URL}`);
-    console.log(`💾 MongoDB: Connected`);
-    console.log('='.repeat(50));
-});
+// Start server if not running in Vercel/Serverless environment
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log('='.repeat(50));
+        console.log(`🚀 SmartBus Wallet System Backend`);
+        console.log(`📡 Server running at http://localhost:${port}`);
+        console.log(`🔐 Fingerprint Scanner: ${process.env.FINGERPRINT_SCANNER_URL}`);
+        console.log(`💾 MongoDB: Connected`);
+        console.log('='.repeat(50));
+    });
+}
+
+module.exports = app;
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
